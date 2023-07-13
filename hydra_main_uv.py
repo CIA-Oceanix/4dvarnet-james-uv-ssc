@@ -4,13 +4,13 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-
 import hydra
 import pandas as pd
 from datetime import datetime, timedelta
 from hydra.utils import get_class, instantiate, call
 from omegaconf import OmegaConf
 import hydra_config
+
 import numpy as np
 
 def get_profiler():
@@ -160,34 +160,34 @@ class FourDVarNetHydraRunner:
                                )
 
         if ( ckpt_path is not None ) & ( hasattr(self.cfg, 'flag_update_training_config') == True  ) :
-            
-            
+
+
             if self.cfg.flag_update_training_config == True :
                 print('\n')
                 print('... update solver iterations : %d/%d -- %d/%d'%(mod.hparams.n_fourdvar_iter,mod.hparams.n_grad,self.cfg.k_n_grad,self.cfg.n_grad))
                 mod.hparams.n_fourdvar_iter = self.cfg.k_n_grad
                 mod.hparams.k_n_grad = self.cfg.k_n_grad
                 mod.hparams.n_grad = self.cfg.n_grad
-                
+
                 print('.... Update parameters after loading chkpt model')
-                
-                
-                
+
+
+
                 if( hasattr(self.cfg, 'type_div_train_loss') ):
                     print('... Update div/strain loss type to %d'%self.cfg.type_div_train_loss)
                     mod.hparams.type_div_train_loss = self.cfg.type_div_train_loss
                     mod.hparams.alpha_mse_div = self.cfg.alpha_mse_div
                     mod.hparams.alpha_mse_strain = self.cfg.alpha_mse_strain
-                    
+
                     #print('.... Update sst resolution: %d'%self.cfg.scale_dwscaling_sst)
                     #mod.hparams.scale_dwscaling_sst = self.cfg.scale_dwscaling_sst
                     if hasattr(self.cfg, 'aug_train_data') :
                         mod.hparams.aug_train_data = self.cfg.aug_train_data
-                    
+
                     if hasattr(self.cfg, 'alpha_loss_hr') :
                         mod.hparams.alpha_loss_hr = self.cfg.alpha_loss_hr
                         mod.hparams.alpha_loss_lr = self.cfg.alpha_loss_lr
-                                       
+
                         print('.. Update solver iteration parameters')
                         mod.hparams.n_fourdvar_iter_lr = self.cfg.n_fourdvar_iter_lr
                         mod.hparams.n_fourdvar_iter_hr = self.cfg.n_fourdvar_iter_hr
@@ -203,13 +203,12 @@ class FourDVarNetHydraRunner:
         :param trainer_kwargs: (Optional) Trainer arguments
         :return:
         """
-        
+
         mod = self._get_model(ckpt_path=ckpt_path)
-        print('...... Current ckpt filename (test): '+self.filename_chkpt)
-                
+        print('...... Current ckpt filename '+self.filename_chkpt)
         self.filename_chkpt = mod.update_filename_chkpt( self.filename_chkpt )
         print('...... New ckpt filename '+self.filename_chkpt)
-        
+
         checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                               filename=self.filename_chkpt,
                                               save_top_k=3,
@@ -236,7 +235,7 @@ class FourDVarNetHydraRunner:
         :param dataloader: Dataloader on which to run the test Checkpoint from which to resume
         :param trainer_kwargs: (Optional)
         """
-    
+
         if _trainer is not None:
             _trainer.test(mod, dataloaders=self.dataloaders[dataloader])
             return
@@ -245,7 +244,7 @@ class FourDVarNetHydraRunner:
 
         trainer = pl.Trainer(num_nodes=1, gpus=1, accelerator=None, **trainer_kwargs)
         trainer.test(mod, dataloaders=self.dataloaders[dataloader])
-        
+
         print('...... Model: '+ckpt_path)
         return mod
 
@@ -281,8 +280,6 @@ def _main(cfg):
     print(OmegaConf.to_yaml(cfg))
     pl.seed_everything(seed=cfg.get('seed', None))
     dm = instantiate(cfg.datamodule)
-    
-    print( dm )
     if cfg.get('callbacks') is not None:
         callbacks = [instantiate(cb_cfg) for cb_cfg in cfg.callbacks]
     else:
@@ -295,7 +292,6 @@ def _main(cfg):
     else:
         logger=True
     lit_mod_cls = get_class(cfg.lit_mod_cls)
-    
     runner = FourDVarNetHydraRunner(cfg.params, dm, lit_mod_cls, callbacks=callbacks, logger=logger)
     call(cfg.entrypoint, self=runner)
 
