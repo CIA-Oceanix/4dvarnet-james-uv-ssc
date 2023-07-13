@@ -1,0 +1,51 @@
+# @package _global_
+
+params:
+  k_n_grad: 1
+  n_grad: 0
+  dT: 7
+  DimAE: 50
+  dim_grad_solver: 150
+  dim_obs_sst_feat: 20
+  use_sst_obs: false  # true
+  use_sst_state: true
+  phi_param: unet1
+  ckpt_name: modelUVwSSTGF-{epoch:02d}-{val_loss:.4f}
+  patch_weight:
+    _target_: lit_model_augstate.get_cropped_hanning_mask
+    patch_size: ${datamodule.slice_win}
+    crop:
+      time: 1
+  val_diag_freq: 5
+  padding_mode: reflect
+  alpha_mse_div: 1000.0
+  alpha_mse_ssh: 50.  # loss
+  alpha_mse_gssh: 1000.
+  alpha_mse_uv: 50.
+  alpha_mse_uv_geo: 25
+  alpha_sampling_uv: 10.
+  alpha_mse_strain: 0.
+  norm_obs: l2
+  norm_prior: l2
+  flag_update_training_config: false
+  sst_model: nolinear-tanh-bn
+  scale_dwscaling: 1
+  residual_wrt_geo_velocities: 0
+  sampling_model: sampling-from-sst
+  nb_feat_sampling_operator: 0
+  thr_l1_sampling_uv: .1
+  type_div_train_loss: 1
+
+datamodule:
+  aug_train_data: true
+  resize_factor: 1
+
+defaults:
+  - /xp/ronan/base_xp_uv
+  - /splits/dc_boost_swot@datamodule
+  - /xp/xp_aug/aug/with_aug_state_uv
+  - /xp/xp_aug/dl/d240_p240x5_s240x1
+  - /xp/xp_aug/sst/with_sst
+  - /xp/xp_aug/loss/map
+  - /xp/xp_aug/train_strat/const_lr_ngrad_5_3cas
+  - _self_
