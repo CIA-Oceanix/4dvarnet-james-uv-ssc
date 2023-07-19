@@ -467,8 +467,9 @@ if 1*0 :
         return np.sqrt( ( dv_dx + du_dy ) **2 +  (du_dx - dv_dy) **2 )
 
 
-def get_4dvarnet(hparams):
-    sst_shape = hparams.dT if hparams.use_sst_state else 0
+def get_4dvarnet(hparams, in_test=False):
+    sst_shape = hparams.dT if hparams.use_sst_state and not in_test else 0
+
     return NN_4DVar.Solver_Grad_4DVarNN(
                 Phi_r(hparams.shape_state[0]+sst_shape, hparams.DimAE, hparams.dW, hparams.dW2, hparams.sS,
                     hparams.nbBlocks, hparams.dropout_phi_r, hparams.stochastic, hparams.phi_param),
@@ -478,7 +479,7 @@ def get_4dvarnet(hparams):
                 hparams.norm_obs, hparams.norm_prior, hparams.shape_state, hparams.n_grad * hparams.n_fourdvar_iter)
 
 
-def get_4dvarnet_sst(hparams):
+def get_4dvarnet_sst(hparams, in_test=False):
     print('...... Set mdoel %d'%hparams.use_sst_obs,flush=True)
     if hparams.use_sst_obs :
         if hparams.sst_model == 'linear-bn' :
@@ -549,7 +550,7 @@ def get_4dvarnet_sst(hparams):
                             hparams.norm_obs, hparams.norm_prior, hparams.shape_state, hparams.n_grad * hparams.n_fourdvar_iter)
 
     else:
-       return get_4dvarnet(hparams)
+       return get_4dvarnet(hparams, in_test)
 
 
 class ModelSamplingFromSST(torch.nn.Module):
@@ -892,6 +893,9 @@ class LitModelUV(pl.LightningModule):
         hparam = {} if hparam is None else hparam
         hparams = hparam if isinstance(hparam, dict) else OmegaConf.to_container(hparam, resolve=True)
 
+        # In test (for U-Net-SSH-SST)
+        self._in_test = kwargs.pop('in_test', False)
+
         # self.save_hyperparameters({**hparams, **kwargs})
         self.save_hyperparameters({**hparams, **kwargs}, logger=False)
         self.latest_metrics = {}
@@ -1100,7 +1104,7 @@ class LitModelUV(pl.LightningModule):
         return filename_chkpt.replace(old_suffix,suffix_chkpt)
 
     def create_model(self):
-        return self.MODELS[self.model_name](self.hparams)
+        return self.MODELS[self.model_name](self.hparams, self._in_test)
 
     def forward(self, batch, phase='test'):
         losses = []

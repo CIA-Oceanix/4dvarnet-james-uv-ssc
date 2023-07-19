@@ -96,7 +96,7 @@ class FourDVarNetHydraRunner:
         mod, trainer = self.train(ckpt_path, **trainer_kwargs)
         self.test(dataloader=dataloader, _mod=mod, _trainer=trainer)
 
-    def _get_model(self, ckpt_path=None):
+    def _get_model(self, ckpt_path=None, in_test=False):
         """
         Load model from ckpt_path or instantiate new model
         :param ckpt_path: (Optional) Checkpoint path to load
@@ -129,7 +129,8 @@ class FourDVarNetHydraRunner:
                                                     test_domain=self.cfg.test_domain,
                                                     resolution=self.resolution,
                                                     original_coords=self.original_coords,
-                                                    padded_coords=self.padded_coords
+                                                    padded_coords=self.padded_coords,
+                                                    in_test=in_test,
                                                     )
 
         else:
@@ -156,7 +157,8 @@ class FourDVarNetHydraRunner:
                                test_domain=self.cfg.test_domain,
                                resolution=self.resolution,
                                original_coords=self.original_coords,
-                               padded_coords=self.padded_coords
+                               padded_coords=self.padded_coords,
+                               in_test=in_test,
                                )
 
         if ( ckpt_path is not None ) & ( hasattr(self.cfg, 'flag_update_training_config') == True  ) :
@@ -240,7 +242,7 @@ class FourDVarNetHydraRunner:
             _trainer.test(mod, dataloaders=self.dataloaders[dataloader])
             return
 
-        mod = _mod or self._get_model(ckpt_path=ckpt_path)
+        mod = _mod or self._get_model(ckpt_path=ckpt_path, in_test=True)
 
         trainer = pl.Trainer(num_nodes=1, gpus=1, accelerator=None, **trainer_kwargs)
         trainer.test(mod, dataloaders=self.dataloaders[dataloader])
