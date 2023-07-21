@@ -1043,65 +1043,66 @@ class LitModelUV(pl.LightningModule):
 
     def update_filename_chkpt(self,filename_chkpt):
 
-        old_suffix = '-{epoch:02d}-{val_loss:.4f}'
+        # old_suffix = '-{epoch:02d}-{val_loss:.4f}'
 
-        suffix_chkpt = '-'+self.hparams.phi_param+'_%03d-augdata'%self.hparams.DimAE
+        # suffix_chkpt = '-'+self.hparams.phi_param+'_%03d-augdata'%self.hparams.DimAE
 
-        if self.scale_dwscaling > 1.0 :
-            suffix_chkpt = suffix_chkpt+'-dws%02d'%int(self.scale_dwscaling)
+        # if self.scale_dwscaling > 1.0 :
+        #     suffix_chkpt = suffix_chkpt+'-dws%02d'%int(self.scale_dwscaling)
 
-        if self.scale_dwscaling_sst > 1. :
-            suffix_chkpt = suffix_chkpt+'-dws-sst%02d'%int(self.scale_dwscaling_sst)
+        # if self.scale_dwscaling_sst > 1. :
+        #     suffix_chkpt = suffix_chkpt+'-dws-sst%02d'%int(self.scale_dwscaling_sst)
 
-        if self.model_sampling_uv is not None:
-            suffix_chkpt = suffix_chkpt+'-sampling_sst_%d_%03d'%(self.hparams.nb_feat_sampling_operator,int(100*self.hparams.thr_l1_sampling_uv))
+        # if self.model_sampling_uv is not None:
+        #     suffix_chkpt = suffix_chkpt+'-sampling_sst_%d_%03d'%(self.hparams.nb_feat_sampling_operator,int(100*self.hparams.thr_l1_sampling_uv))
 
-        if self.hparams.n_grad > 0 :
+        # if self.hparams.n_grad > 0 :
 
-            if self.hparams.aug_state :
-                suffix_chkpt = suffix_chkpt+'-augstate-dT%02d'%(self.hparams.dT)
-            if self.use_sst_state :
-                suffix_chkpt = suffix_chkpt+'-mmstate-augstate-dT%02d'%(self.hparams.dT)
+        #     if self.hparams.aug_state :
+        #         suffix_chkpt = suffix_chkpt+'-augstate-dT%02d'%(self.hparams.dT)
+        #     if self.use_sst_state :
+        #         suffix_chkpt = suffix_chkpt+'-mmstate-augstate-dT%02d'%(self.hparams.dT)
 
-            if self.use_sst_obs :
-                suffix_chkpt = suffix_chkpt+'-sstobs-'+self.hparams.sst_model+'_%02d'%(self.hparams.dim_obs_sst_feat)
+        #     if self.use_sst_obs :
+        #         suffix_chkpt = suffix_chkpt+'-sstobs-'+self.hparams.sst_model+'_%02d'%(self.hparams.dim_obs_sst_feat)
 
-            if self.residual_wrt_geo_velocities > 0  :
-                suffix_chkpt = suffix_chkpt+'-wgeo%d'%self.residual_wrt_geo_velocities
-            elif self.type_div_train_loss == 1 :
-                suffix_chkpt = suffix_chkpt+'-nowgeo'
+        #     if self.residual_wrt_geo_velocities > 0  :
+        #         suffix_chkpt = suffix_chkpt+'-wgeo%d'%self.residual_wrt_geo_velocities
+        #     elif self.type_div_train_loss == 1 :
+        #         suffix_chkpt = suffix_chkpt+'-nowgeo'
 
-            if ( self.hparams.alpha_mse_strain == 0. ) | ( self.hparams.alpha_mse_div == 0. ) :
-                if ( self.hparams.alpha_mse_strain == 0. ) & ( self.hparams.alpha_mse_div == 0. ) :
-                    suffix_chkpt = suffix_chkpt+'-nodivstrain'
-                elif self.hparams.alpha_mse_strain == 0. :
-                    suffix_chkpt = suffix_chkpt+'-nostrain'
-                else :
-                    suffix_chkpt = suffix_chkpt+'-nodiv'
+        #     if ( self.hparams.alpha_mse_strain == 0. ) | ( self.hparams.alpha_mse_div == 0. ) :
+        #         if ( self.hparams.alpha_mse_strain == 0. ) & ( self.hparams.alpha_mse_div == 0. ) :
+        #             suffix_chkpt = suffix_chkpt+'-nodivstrain'
+        #         elif self.hparams.alpha_mse_strain == 0. :
+        #             suffix_chkpt = suffix_chkpt+'-nostrain'
+        #         else :
+        #             suffix_chkpt = suffix_chkpt+'-nodiv'
 
-            suffix_chkpt = suffix_chkpt+'-grad_%02d_%02d_%03d'%(self.hparams.n_grad,self.hparams.k_n_grad,self.hparams.dim_grad_solver)
-            if self.model.model_Grad.asymptotic_term == True :
-                suffix_chkpt = suffix_chkpt+'+fsgd'
-                if self.hparams.learn_fsgd_param == True :
-                    suffix_chkpt = suffix_chkpt+'train'
+        #     suffix_chkpt = suffix_chkpt+'-grad_%02d_%02d_%03d'%(self.hparams.n_grad,self.hparams.k_n_grad,self.hparams.dim_grad_solver)
+        #     if self.model.model_Grad.asymptotic_term == True :
+        #         suffix_chkpt = suffix_chkpt+'+fsgd'
+        #         if self.hparams.learn_fsgd_param == True :
+        #             suffix_chkpt = suffix_chkpt+'train'
 
-        else:
-            if ( self.use_sst ) & ( self.use_sst_state ) :
-                suffix_chkpt = suffix_chkpt+'-DirectInv-wSST'
-            else:
-                suffix_chkpt = suffix_chkpt+'-DirectInv'
-            suffix_chkpt = suffix_chkpt+'-dT%02d'%(self.hparams.dT)
+        # else:
+        #     if ( self.use_sst ) & ( self.use_sst_state ) :
+        #         suffix_chkpt = suffix_chkpt+'-DirectInv-wSST'
+        #     else:
+        #         suffix_chkpt = suffix_chkpt+'-DirectInv'
+        #     suffix_chkpt = suffix_chkpt+'-dT%02d'%(self.hparams.dT)
 
-            if ( self.hparams.alpha_mse_strain == 0. ) | ( self.hparams.alpha_mse_div == 0. ) :
-                if ( self.hparams.alpha_mse_strain == 0. ) & ( self.hparams.alpha_mse_div == 0. ) :
-                    suffix_chkpt = suffix_chkpt+'-nodivstrain'
-                elif self.hparams.alpha_mse_strain == 0. :
-                    suffix_chkpt = suffix_chkpt+'-nostrain'
-                else :
-                    suffix_chkpt = suffix_chkpt+'-nodiv'
-        suffix_chkpt = suffix_chkpt+old_suffix
+        #     if ( self.hparams.alpha_mse_strain == 0. ) | ( self.hparams.alpha_mse_div == 0. ) :
+        #         if ( self.hparams.alpha_mse_strain == 0. ) & ( self.hparams.alpha_mse_div == 0. ) :
+        #             suffix_chkpt = suffix_chkpt+'-nodivstrain'
+        #         elif self.hparams.alpha_mse_strain == 0. :
+        #             suffix_chkpt = suffix_chkpt+'-nostrain'
+        #         else :
+        #             suffix_chkpt = suffix_chkpt+'-nodiv'
+        # suffix_chkpt = suffix_chkpt+old_suffix
 
-        return filename_chkpt.replace(old_suffix,suffix_chkpt)
+        # return filename_chkpt.replace(old_suffix,suffix_chkpt)
+        return filename_chkpt
 
     def create_model(self):
         return self.MODELS[self.model_name](self.hparams, self._in_test)
