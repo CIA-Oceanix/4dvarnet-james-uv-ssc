@@ -1,5 +1,6 @@
 # @package _global_
 
+xp_name: 4DVarNet-SSH-only
 params:
   flag_update_training_config: false
   sst_model: nolinear-tanh-bn
@@ -12,7 +13,7 @@ params:
   dim_obs_sst_feat: 20
   dim_grad_solver: 150
   phi_param: unet1
-  ckpt_name: modelUVwSSTGF-{epoch:02d}-{val_loss:.4f}
+  ckpt_name: 4DVarNet-SSH-only-{epoch:02d}-{val_loss:.4f}
   use_sst_obs: false
   use_sst_state: false
   patch_weight:
